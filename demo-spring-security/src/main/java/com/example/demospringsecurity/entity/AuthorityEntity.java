@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
+import java.io.Serial;
 import java.io.Serializable;
 
 @Data
@@ -19,11 +20,14 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Entity
 @Table(name = "authorities", indexes = {
-        @Index(name = "ix_auth_username ", columnList = "users, authority", unique = true)
+        @Index(name = "ix_auth_username ", columnList = "username, authority", unique = true)
 })
-@AssociationOverride(name = "authorityId.users", joinColumns = @JoinColumn(name = "users"))
+@AssociationOverride(name = "authorityId.username", joinColumns = @JoinColumn(name = "username"))
 @AttributeOverride(name = "authorityId.authority", column = @Column(name = "authority", length = 50, nullable = false))
 public class AuthorityEntity implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -7746123128493234320L;
 
     @EmbeddedId
     private AuthorityId authorityId;
