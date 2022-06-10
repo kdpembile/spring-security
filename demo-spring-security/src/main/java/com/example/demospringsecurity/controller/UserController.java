@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,12 +29,24 @@ public class UserController {
 
     @GetMapping(path = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     public Page<UserDto> getUsers(@RequestParam int page, @RequestParam int size) {
-        return userService.getUsers(page, size);
+        try {
+            return userService.getUsers(page, size);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
+                    , e.getMessage(), e);
+        }
     }
 
-    @GetMapping(path = "/users/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/user/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
     public UserDto getUser(@PathVariable String username) {
-        return userService.getUser(username);
+        try {
+            return userService.getUser(username);
+
+        } catch (UsernameNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
+                    , String.format("User %s not found"
+                    , username), e);
+        }
     }
 
     @PostMapping(path = "/user/authority/{username}/authority", consumes = MediaType.APPLICATION_JSON_VALUE
