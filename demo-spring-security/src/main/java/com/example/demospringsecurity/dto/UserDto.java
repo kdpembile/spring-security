@@ -12,5 +12,7 @@ public class UserDto {
 
     private String username;
 
-    boolean enabled;
+    private String password;
+
+    private boolean enabled;
 }
