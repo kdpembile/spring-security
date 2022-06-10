@@ -1,6 +1,7 @@
 package com.example.demospringsecurity;
 
-import org.modelmapper.ModelMapper;
+import com.github.dozermapper.core.DozerBeanMapperBuilder;
+import com.github.dozermapper.core.Mapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -11,8 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class DemoSpringSecurityApplication {
 
     @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
+    Mapper mapper() {
+        return DozerBeanMapperBuilder.buildDefault();
     }
 
     @Bean
