@@ -7,8 +7,8 @@ import com.example.demospringsecurity.entity.AuthorityEntity;
 import com.example.demospringsecurity.entity.AuthorityId;
 import com.example.demospringsecurity.entity.UserEntity;
 import com.example.demospringsecurity.service.UserService;
+import com.github.dozermapper.core.Mapper;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private AuthorityDao authorityDao;
 
     @Autowired
-    private ModelMapper mapper;
+    private Mapper mapper;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
