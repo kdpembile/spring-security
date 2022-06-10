@@ -1,8 +1,9 @@
 package com.example.demospringsecurity.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AttributeOverride;
@@ -15,7 +16,8 @@ import javax.persistence.Table;
 import java.io.Serial;
 import java.io.Serializable;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
