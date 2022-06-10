@@ -3,6 +3,8 @@ package com.example.demospringsecurity.service.implementation;
 import com.example.demospringsecurity.dao.AuthorityDao;
 import com.example.demospringsecurity.dao.UserDao;
 import com.example.demospringsecurity.dto.UserDto;
+import com.example.demospringsecurity.entity.AuthorityEntity;
+import com.example.demospringsecurity.entity.AuthorityId;
 import com.example.demospringsecurity.entity.UserEntity;
 import com.example.demospringsecurity.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -57,15 +59,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void saveUser(UserEntity user) {
+    public void saveUser(UserDto user) {
         log.info("Saving user {} ...", user.getUsername());
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        userDao.saveAndFlush(user);
+        UserEntity userEntity = mapper.map(user, UserEntity.class);
 
-        log.info("{} was successfully saved and flushed"
-                , user.getUsername());
+        userDao.saveAndFlush(userEntity);
+
+        log.info("{} was successfully saved and flushed", user.getUsername());
     }
 
     @Override
@@ -90,6 +93,21 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .toList();
 
         return new PageImpl<>(userDtos, pageable, userDtos.size());
+    }
+
+    @Override
+    public void addAuthorityToUser(String username, String authority) {
+        log.info("Adding authority of {} to user {}", authority, username);
+
+        UserEntity userEntity = userDao.findByUsername(username);
+
+        AuthorityEntity authorityEntity = new AuthorityEntity();
+        authorityEntity.setAuthorityId(new AuthorityId(userEntity, authority));
+
+        authorityDao.saveAndFlush(authorityEntity);
+
+        log.info("Authority of {} was successfully saved to user {}"
+                , authority, username);
     }
 
     @Override

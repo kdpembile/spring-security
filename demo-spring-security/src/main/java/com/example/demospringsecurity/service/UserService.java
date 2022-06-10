@@ -1,7 +1,6 @@
 package com.example.demospringsecurity.service;
 
 import com.example.demospringsecurity.dto.UserDto;
-import com.example.demospringsecurity.entity.UserEntity;
 import org.springframework.data.domain.Page;
 
 public interface UserService {
@@ -9,9 +8,9 @@ public interface UserService {
     /**
      * Save new user
      *
-     * @param userEntity user entity
+     * @param user user details
      */
-    void saveUser(UserEntity userEntity);
+    void saveUser(UserDto user);
 
     /**
      * Return user dto
@@ -31,12 +30,20 @@ public interface UserService {
     Page<UserDto> getUsers(int page, int size);
 
     /**
+     * Add authority to user
+     *
+     * @param username user username
+     * @param authority user authority
+     */
+    void addAuthorityToUser(String username, String authority);
+
+    /**
      * Update user
      *
      * @param username user username
-     * @param userDto user dto
+     * @param user user details
      */
-    void updateUser(String username, UserDto userDto);
+    void updateUser(String username, UserDto user);
 
     /**
      * Delete user
