@@ -1,9 +1,14 @@
 package com.example.demospringsecurity.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.dozermapper.core.Mapping;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +22,8 @@ public class UserDto {
     private String username;
 
     @Mapping("password")
+    @Getter(value = AccessLevel.NONE)
+    @Setter(value = AccessLevel.NONE)
     private String password;
 
     @Mapping("enabled")
@@ -24,4 +31,14 @@ public class UserDto {
 
     @Mapping("authority")
     private Set<AuthorityDto> authority = new HashSet<>();
+
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
+
+    @JsonProperty("password")
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
