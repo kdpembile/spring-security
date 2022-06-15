@@ -11,10 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AuthorityIdDto {
 
-    @Mapping("username")
-    @JsonProperty("username")
-    private UserDto userDto;
-
     @Mapping("authority")
     @JsonProperty("authority")
     private String authority;
