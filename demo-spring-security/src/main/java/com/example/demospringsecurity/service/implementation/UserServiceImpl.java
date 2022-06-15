@@ -131,6 +131,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         UserEntity userEntity = mapper.map(user, UserEntity.class);
 
+        userEntity.getAuthority().forEach(authority ->
+                authority.getAuthorityId().setUsername(userEntity));
+
         userDao.saveAndFlush(userEntity);
 
         log.info("User {} was successfully updated to user {}"
