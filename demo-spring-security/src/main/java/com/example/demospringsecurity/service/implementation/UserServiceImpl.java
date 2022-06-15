@@ -44,11 +44,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    public static final String USER_NOT_FOUND = "User not found in the database";
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserEntity userEntity = userDao.findByUsername(username);
         if (userEntity == null) {
-            throw new UsernameNotFoundException("User not found in the database");
+            throw new UsernameNotFoundException(USER_NOT_FOUND);
         }
 
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
@@ -76,11 +78,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDto getUser(String username) {
-        UserEntity userEntity = userDao.findByUsername(username);
-
-        if (userEntity == null) {
-            throw new UsernameNotFoundException("User not found");
+        if (!userDao.existsById(username)) {
+            throw new UsernameNotFoundException(USER_NOT_FOUND);
         }
+
+        UserEntity userEntity = userDao.findByUsername(username);
 
         return mapper.map(userEntity, UserDto.class);
     }
@@ -117,6 +119,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public void updateUser(String username, UserDto user) {
         log.info("Updating user {}", username);
 
+        if (!userDao.existsById(username)) {
+            throw new UsernameNotFoundException(USER_NOT_FOUND);
+        }
+
         userDao.deleteById(username);
 
         UserEntity userEntity = mapper.map(user, UserEntity.class);
@@ -130,6 +136,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void deleteUser(String username) {
         log.info("Deleting user {}", username);
+
+        if (!userDao.existsById(username)) {
+            throw new UsernameNotFoundException(USER_NOT_FOUND);
+        }
 
         userDao.deleteById(username);
 
