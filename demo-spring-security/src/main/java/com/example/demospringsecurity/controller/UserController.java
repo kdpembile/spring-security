@@ -120,8 +120,7 @@ public class UserController {
         }
     }
 
-    @DeleteMapping(path = "/user/{username}", consumes = MediaType.APPLICATION_JSON_VALUE
-            , produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "/user/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MessageResponse> deleteUser(@PathVariable String username) {
         try {
             userService.deleteUser(username);
