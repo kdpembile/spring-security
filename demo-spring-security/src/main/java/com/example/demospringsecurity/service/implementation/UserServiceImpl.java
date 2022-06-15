@@ -101,8 +101,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void addAuthorityToUser(String username, String authority) {
+    public void addAuthorityToUser(String username, String authority) throws UsernameNotFoundException {
         log.info("Adding authority of {} to user {}", authority, username);
+
+        if (!userDao.existsById(username)) {
+            throw new UsernameNotFoundException(USER_NOT_FOUND);
+        }
 
         UserEntity userEntity = userDao.findByUsername(username);
 

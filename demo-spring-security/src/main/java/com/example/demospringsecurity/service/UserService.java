@@ -2,6 +2,7 @@ package com.example.demospringsecurity.service;
 
 import com.example.demospringsecurity.dto.UserDto;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public interface UserService {
 
@@ -35,7 +36,7 @@ public interface UserService {
      * @param username user username
      * @param authority user authority
      */
-    void addAuthorityToUser(String username, String authority);
+    void addAuthorityToUser(String username, String authority) throws UsernameNotFoundException;
 
     /**
      * Update user
