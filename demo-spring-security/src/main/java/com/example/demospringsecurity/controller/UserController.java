@@ -60,11 +60,8 @@ public class UserController {
         try {
             userService.addAuthorityToUser(username, authority);
 
-            MessageResponse response = new MessageResponse();
-            response.setMessage(String.format("Authority of %s was successfully saved to user %s"
-                    , authority, username));
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new MessageResponse("Authority was successfully add to user"));
 
         } catch (UsernameNotFoundException e) {
             log.error(e.getMessage(), e);
@@ -76,8 +73,7 @@ public class UserController {
             log.error(e.getMessage(), e);
 
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , String.format("Failed to save authority of %s to user %s"
-                    , authority, username), e);
+                    , "Failed to save authority to user", e);
         }
     }
 
@@ -87,11 +83,8 @@ public class UserController {
         try {
             userService.saveUser(user);
 
-            MessageResponse response = new MessageResponse();
-            response.setMessage(String.format("User %s was successfully saved"
-                    , user.getUsername()));
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new MessageResponse("User was successfully saved"));
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -107,11 +100,8 @@ public class UserController {
         try {
             userService.updateUser(username, user);
 
-            MessageResponse response = new MessageResponse();
-            response.setMessage(String.format("User %s was successfully updated"
-                    , username));
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new MessageResponse("User was successfully updated"));
 
         } catch (UsernameNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
@@ -121,7 +111,7 @@ public class UserController {
             log.error(e.getMessage(), e);
 
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , String.format("Failed to update user %s", username), e);
+                    , "Failed to update user", e);
         }
     }
 
@@ -130,10 +120,8 @@ public class UserController {
         try {
             userService.deleteUser(username);
 
-            MessageResponse response = new MessageResponse();
-            response.setMessage(String.format("User %s was successfully deleted", username));
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new MessageResponse("User was successfully deleted"));
 
         } catch (UsernameNotFoundException e) {
             log.error(e.getMessage(), e);
@@ -145,7 +133,7 @@ public class UserController {
             log.error(e.getMessage(), e);
 
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , String.format("Failed to delete user %s", username), e);
+                    , "Failed to delete user", e);
         }
     }
 }
