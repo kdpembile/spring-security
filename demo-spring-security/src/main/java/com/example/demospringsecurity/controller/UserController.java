@@ -49,8 +49,7 @@ public class UserController {
         }
     }
 
-    @PostMapping(path = "/user/authority/{username}/authority", consumes = MediaType.APPLICATION_JSON_VALUE
-            , produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/user/authority/{username}/{authority}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MessageResponse> addAuthorityToUser(@PathVariable String username, @PathVariable String authority) {
         try {
             userService.addAuthorityToUser(username, authority);
