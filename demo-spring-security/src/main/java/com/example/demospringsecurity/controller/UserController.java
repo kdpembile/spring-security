@@ -27,6 +27,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    public static final String USER_NOT_FOUND = "User %s not found in the database";
+
     @GetMapping(path = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     public Page<UserDto> getUsers(@RequestParam int page, @RequestParam int size) {
         try {
@@ -44,8 +46,7 @@ public class UserController {
 
         } catch (UsernameNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , String.format("User %s not found"
-                    , username), e);
+                    , String.format(USER_NOT_FOUND, username), e);
         }
     }
 
@@ -59,6 +60,10 @@ public class UserController {
                     , authority, username));
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        } catch (UsernameNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
+                    , String.format(USER_NOT_FOUND, username), e);
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -102,6 +107,10 @@ public class UserController {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
+        } catch (UsernameNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
+                    , String.format(USER_NOT_FOUND, username), e);
+
         } catch (Exception e) {
             log.error(e.getMessage(), e);
 
@@ -122,6 +131,10 @@ public class UserController {
                     , username));
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        } catch (UsernameNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
+                    , String.format(USER_NOT_FOUND, username), e);
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
