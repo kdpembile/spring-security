@@ -66,20 +66,23 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         UserEntity userEntity = mapper.map(user, UserEntity.class);
 
+        userEntity.getAuthority().forEach(authority ->
+                authority.getAuthorityId().setUsername(userEntity));
+
         userDao.saveAndFlush(userEntity);
 
-        log.info("{} was successfully saved and flushed", user.getUsername());
+        log.info("{} was successfully saved and flushed", userEntity.getUsername());
     }
 
     @Override
     public UserDto getUser(String username) {
-        UserEntity user = userDao.findByUsername(username);
+        UserEntity userEntity = userDao.findByUsername(username);
 
-        if (user == null) {
+        if (userEntity == null) {
             throw new UsernameNotFoundException("User not found");
         }
 
-        return mapper.map(user, UserDto.class);
+        return mapper.map(userEntity, UserDto.class);
     }
 
     @Override
@@ -111,17 +114,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void updateUser(String username, UserDto userDto) {
+    public void updateUser(String username, UserDto user) {
         log.info("Updating user {}", username);
 
         userDao.deleteById(username);
 
-        UserEntity userEntity = mapper.map(userDto, UserEntity.class);
+        UserEntity userEntity = mapper.map(user, UserEntity.class);
 
         userDao.saveAndFlush(userEntity);
 
         log.info("User {} was successfully updated to user {}"
-                , username, userDto.getUsername());
+                , username, user.getUsername());
     }
 
     @Override
