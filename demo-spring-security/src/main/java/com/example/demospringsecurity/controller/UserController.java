@@ -33,7 +33,10 @@ public class UserController {
     public Page<UserDto> getUsers(@RequestParam int page, @RequestParam int size) {
         try {
             return userService.getUsers(page, size);
+
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
+
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
                     , e.getMessage(), e);
         }
@@ -45,6 +48,8 @@ public class UserController {
             return userService.getUser(username);
 
         } catch (UsernameNotFoundException e) {
+            log.error(e.getMessage(), e);
+
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
                     , String.format(USER_NOT_FOUND, username), e);
         }
@@ -62,6 +67,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (UsernameNotFoundException e) {
+            log.error(e.getMessage(), e);
+
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
                     , String.format(USER_NOT_FOUND, username), e);
 
@@ -90,8 +97,7 @@ public class UserController {
             log.error(e.getMessage(), e);
 
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , String.format("Failed to save user %s"
-                    , user.getUsername()), e);
+                    , String.format("Failed to save user %s", user.getUsername()), e);
         }
     }
 
@@ -115,8 +121,7 @@ public class UserController {
             log.error(e.getMessage(), e);
 
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , String.format("Failed to update user %s"
-                    , username), e);
+                    , String.format("Failed to update user %s", username), e);
         }
     }
 
@@ -126,12 +131,13 @@ public class UserController {
             userService.deleteUser(username);
 
             MessageResponse response = new MessageResponse();
-            response.setMessage(String.format("User %s was successfully deleted"
-                    , username));
+            response.setMessage(String.format("User %s was successfully deleted", username));
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (UsernameNotFoundException e) {
+            log.error(e.getMessage(), e);
+
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
                     , String.format(USER_NOT_FOUND, username), e);
 
@@ -139,8 +145,7 @@ public class UserController {
             log.error(e.getMessage(), e);
 
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , String.format("Failed to delete user %s"
-                    , username), e);
+                    , String.format("Failed to delete user %s", username), e);
         }
     }
 }
