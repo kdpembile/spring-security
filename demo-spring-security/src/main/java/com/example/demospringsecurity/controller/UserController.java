@@ -22,13 +22,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @RestController
-public class UserController {
+public class UserController implements UserApi {
 
     @Autowired
     private UserService userService;
 
-    public static final String USER_NOT_FOUND = "User %s not found in the database";
+    public static final String USER_NOT_FOUND = "User not found in the database";
 
+    @Override
     @GetMapping(path = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     public Page<UserDto> getUsers(@RequestParam int page, @RequestParam int size) {
         try {
@@ -42,6 +43,7 @@ public class UserController {
         }
     }
 
+    @Override
     @GetMapping(path = "/user/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
     public UserDto getUser(@PathVariable String username) {
         try {
@@ -50,11 +52,11 @@ public class UserController {
         } catch (UsernameNotFoundException e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , String.format(USER_NOT_FOUND, username), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, USER_NOT_FOUND, e);
         }
     }
 
+    @Override
     @PostMapping(path = "/user/authority/{username}/{authority}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MessageResponse> addAuthorityToUser(@PathVariable String username, @PathVariable String authority) {
         try {
@@ -66,8 +68,7 @@ public class UserController {
         } catch (UsernameNotFoundException e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , String.format(USER_NOT_FOUND, username), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, USER_NOT_FOUND, e);
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -77,6 +78,7 @@ public class UserController {
         }
     }
 
+    @Override
     @PostMapping(path = "/user", consumes = MediaType.APPLICATION_JSON_VALUE
             , produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MessageResponse> saveUser(@RequestBody UserDto user) {
@@ -89,23 +91,25 @@ public class UserController {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , String.format("Failed to save user %s", user.getUsername()), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Failed to save user", e);
         }
     }
 
+    @Override
     @PutMapping(path = "/user/{username}", consumes = MediaType.APPLICATION_JSON_VALUE
             , produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MessageResponse> updateUser(@PathVariable String username, @RequestBody UserDto user) {
         try {
             userService.updateUser(username, user);
 
-            return ResponseEntity.status(HttpStatus.CREATED)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body(new MessageResponse("User was successfully updated"));
 
         } catch (UsernameNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , String.format(USER_NOT_FOUND, username), e);
+            log.error(e.getMessage(), e);
+
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, USER_NOT_FOUND, e);
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -115,19 +119,19 @@ public class UserController {
         }
     }
 
+    @Override
     @DeleteMapping(path = "/user/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MessageResponse> deleteUser(@PathVariable String username) {
         try {
             userService.deleteUser(username);
 
-            return ResponseEntity.status(HttpStatus.CREATED)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body(new MessageResponse("User was successfully deleted"));
 
         } catch (UsernameNotFoundException e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , String.format(USER_NOT_FOUND, username), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, USER_NOT_FOUND, e);
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
