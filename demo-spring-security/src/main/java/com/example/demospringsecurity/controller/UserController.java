@@ -52,7 +52,7 @@ public class UserController implements UserApi {
         } catch (UsernameNotFoundException e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, USER_NOT_FOUND, e);
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, USER_NOT_FOUND, e);
         }
     }
 
@@ -68,7 +68,7 @@ public class UserController implements UserApi {
         } catch (UsernameNotFoundException e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, USER_NOT_FOUND, e);
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, USER_NOT_FOUND, e);
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -109,7 +109,7 @@ public class UserController implements UserApi {
         } catch (UsernameNotFoundException e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, USER_NOT_FOUND, e);
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, USER_NOT_FOUND, e);
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -131,7 +131,7 @@ public class UserController implements UserApi {
         } catch (UsernameNotFoundException e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, USER_NOT_FOUND, e);
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, USER_NOT_FOUND, e);
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
