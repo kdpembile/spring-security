@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
@@ -22,11 +23,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 class UserServiceImplTest {
@@ -49,6 +51,49 @@ class UserServiceImplTest {
     @BeforeEach
     void setUp() {
         openMocks(this);
+    }
+
+    @Test
+    void loadUserByUsername() {
+        // given
+        String username = "KD";
+        String authority = "ROLE_ADMIN";
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setUsername(username);
+        userEntity.setPassword("secret");
+        userEntity.setEnabled(true);
+
+        Set<AuthorityEntity> authorityEntities = new HashSet<>();
+        authorityEntities.add(new AuthorityEntity(
+                new AuthorityId(userEntity, authority)));
+
+        userEntity.setAuthority(authorityEntities);
+
+        given(userDao.findByUsername(username))
+                .willReturn(userEntity);
+
+        // when
+        userService.loadUserByUsername(username);
+
+        // then
+        then(userDao).should().findByUsername(username);
+    }
+
+    @Test
+    void loadUserByUsername_whenUserEntityIsNull_thenThrowUsernameNotFoundException() {
+        // given
+        String username = "KD";
+
+        given(userDao.findByUsername(username))
+                .willReturn(null);
+
+        // when
+        assertThrows(UsernameNotFoundException.class,
+                () -> userService.loadUserByUsername(username));
+
+        // then
+        verify(userDao).findByUsername(username);
     }
 
     @Test
@@ -88,31 +133,36 @@ class UserServiceImplTest {
     void getUser() {
         // given
         String username = "KD";
-        String authority = "ROLE_ADMIN";
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUsername(username);
-        userEntity.setPassword("secret");
-        userEntity.setEnabled(true);
+        UserEntity userEntity = mock(UserEntity.class);
 
-        Set<AuthorityEntity> authorityEntities = new HashSet<>();
-        authorityEntities.add(new AuthorityEntity(
-                new AuthorityId(userEntity, authority)));
-
-        userEntity.setAuthority(authorityEntities);
-
-        given(userDao.existsById(anyString()))
+        given(userDao.existsById(username))
                 .willReturn(true);
 
-        given(userDao.findByUsername(anyString()))
+        given(userDao.findByUsername(username))
                 .willReturn(userEntity);
 
         // when
-        userService.getUser(anyString());
+        userService.getUser(username);
 
         // then
-        then(userDao).should().existsById(anyString());
-        then(userDao).should().findByUsername(anyString());
+        then(userDao).should().existsById(username);
+        then(userDao).should().findByUsername(username);
+    }
+
+    @Test
+    void getUser_whenUsernameNotExist_thenThrowUsernameNotFoundException() {
+        // given
+        String username = "KD";
+
+        given(userDao.existsById(username)).willReturn(false);
+
+        // when
+        assertThrows(UsernameNotFoundException.class,
+                () -> userService.getUser(username));
+
+        // then
+        verify(userDao).existsById(username);
     }
 
     @Test
@@ -161,8 +211,24 @@ class UserServiceImplTest {
         userService.addAuthorityToUser(username, authority);
 
         // then
-        then(userDao).should().findByUsername(anyString());
+        then(userDao).should().findByUsername(username);
         then(authorityDao).should().saveAndFlush(authorityEntity);
+    }
+
+    @Test
+    void addAuthorityToUser_whenUsernameNotExist_thenThrowUsernameNotFoundException() {
+        // given
+        String username = "KD";
+        String authority = "ROLE_ADMIN";
+
+        given(userDao.existsById(username)).willReturn(false);
+
+        // when
+        assertThrows(UsernameNotFoundException.class,
+                () -> userService.addAuthorityToUser(username, authority));
+
+        // then
+        verify(userDao).existsById(username);
     }
 
     @Test
@@ -203,6 +269,23 @@ class UserServiceImplTest {
     }
 
     @Test
+    void updateUser_whenUsernameNotExist_thenThrowUsernameNotFoundException() {
+        // given
+        String username = "KD";
+
+        UserDto userDto = mock(UserDto.class);
+
+        given(userDao.existsById(username)).willReturn(false);
+
+        // when
+        assertThrows(UsernameNotFoundException.class,
+                () -> userService.updateUser(username, userDto));
+
+        // then
+        verify(userDao).existsById(username);
+    }
+
+    @Test
     void deleteUser() {
         // given
         String username = "KD";
@@ -217,5 +300,20 @@ class UserServiceImplTest {
         // then
         then(userDao).should().existsById(username);
         then(userDao).should().deleteById(username);
+    }
+
+    @Test
+    void deleteUser_whenUsernameNotExist_thenThrowUsernameNotFoundException() {
+        // given
+        String username = "KD";
+
+        given(userDao.existsById(username)).willReturn(false);
+
+        // when
+        assertThrows(UsernameNotFoundException.class,
+                () -> userService.deleteUser(username));
+
+        // then
+        verify(userDao).existsById(username);
     }
 }
