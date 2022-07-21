@@ -115,7 +115,6 @@ class UserServiceImplTest {
 
         userEntity.setAuthority(authorityEntities);
 
-
         given(mapper.map(userDto, UserEntity.class))
                 .willReturn(userEntity);
 
