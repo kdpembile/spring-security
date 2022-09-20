@@ -9,7 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,8 +26,6 @@ public class UserController implements UserApi {
     @Autowired
     private UserService userService;
 
-    public static final String USER_NOT_FOUND = "User not found in the database";
-
     @Override
     @GetMapping(path = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     public Page<UserDto> getUsers(@RequestParam int page, @RequestParam int size) {
@@ -38,22 +35,14 @@ public class UserController implements UserApi {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
 
     @Override
     @GetMapping(path = "/user/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
     public UserDto getUser(@PathVariable String username) {
-        try {
-            return userService.getUser(username);
-
-        } catch (UsernameNotFoundException e) {
-            log.error(e.getMessage(), e);
-
-            throw new ResponseStatusException(HttpStatus.NO_CONTENT, USER_NOT_FOUND, e);
-        }
+        return userService.getUser(username);
     }
 
     @Override
@@ -65,22 +54,15 @@ public class UserController implements UserApi {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new MessageResponse("Authority was successfully add to user"));
 
-        } catch (UsernameNotFoundException e) {
-            log.error(e.getMessage(), e);
-
-            throw new ResponseStatusException(HttpStatus.NO_CONTENT, USER_NOT_FOUND, e);
-
         } catch (Exception e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , "Failed to save authority to user", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to save authority to user", e);
         }
     }
 
     @Override
-    @PostMapping(path = "/user", consumes = MediaType.APPLICATION_JSON_VALUE
-            , produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/user", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MessageResponse> saveUser(@RequestBody UserDto user) {
         try {
             userService.saveUser(user);
@@ -91,8 +73,7 @@ public class UserController implements UserApi {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Failed to save user", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to save user", e);
         }
     }
 
@@ -106,16 +87,10 @@ public class UserController implements UserApi {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new MessageResponse("User was successfully updated"));
 
-        } catch (UsernameNotFoundException e) {
-            log.error(e.getMessage(), e);
-
-            throw new ResponseStatusException(HttpStatus.NO_CONTENT, USER_NOT_FOUND, e);
-
         } catch (Exception e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , "Failed to update user", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to update user", e);
         }
     }
 
@@ -128,16 +103,10 @@ public class UserController implements UserApi {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new MessageResponse("User was successfully deleted"));
 
-        } catch (UsernameNotFoundException e) {
-            log.error(e.getMessage(), e);
-
-            throw new ResponseStatusException(HttpStatus.NO_CONTENT, USER_NOT_FOUND, e);
-
         } catch (Exception e) {
             log.error(e.getMessage(), e);
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    , "Failed to delete user", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to delete user", e);
         }
     }
 }
