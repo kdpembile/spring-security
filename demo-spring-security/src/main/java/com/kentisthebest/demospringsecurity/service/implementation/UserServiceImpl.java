@@ -1,5 +1,6 @@
 package com.kentisthebest.demospringsecurity.service.implementation;
 
+import com.github.dozermapper.core.Mapper;
 import com.kentisthebest.demospringsecurity.dao.AuthorityDao;
 import com.kentisthebest.demospringsecurity.dao.UserDao;
 import com.kentisthebest.demospringsecurity.dto.UserDto;
@@ -7,7 +8,6 @@ import com.kentisthebest.demospringsecurity.entity.AuthorityEntity;
 import com.kentisthebest.demospringsecurity.entity.AuthorityId;
 import com.kentisthebest.demospringsecurity.entity.UserEntity;
 import com.kentisthebest.demospringsecurity.service.UserService;
-import com.github.dozermapper.core.Mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static com.kentisthebest.demospringsecurity.error.ErrorHandler.USER_NOT_FOUND;
+
 @Slf4j
 @Service
 @Transactional
@@ -43,8 +45,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    public static final String USER_NOT_FOUND = "User not found in the database";
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
