@@ -40,6 +40,11 @@ To run tests, run the following command
 Java
 
 
+## API Documentation (swagger ui)
+
+http://localhost:8080/api/swagger-ui/index.html
+
+
 ## Authors
 
 - [@kentisthebest](https://github.com/kentisthebest)
