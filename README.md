@@ -1,7 +1,7 @@
 
 # Spring Security Demo
 
-Demo project for Spring Security with JWT included.
+Demo project for Spring Security with JWT, and OAuth included.
 
 
 
