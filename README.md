@@ -37,7 +37,7 @@ To run tests, run the following command
 
 
 ## Tech Stack
-Java
+Java SQL
 
 
 ## API Documentation (swagger ui)
