@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         userEntity.getAuthority().forEach(authority ->
                 authorities.add(new SimpleGrantedAuthority(authority.getAuthorityId().getAuthority()))
         );
-        return new User(userEntity.getUsername(), userEntity.getPassword(), authorities);
+        return new User(userEntity.getUsername(), userEntity.getPassword(), userEntity.isEnabled(), true, true, true, authorities);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         authorityDao.saveAndFlush(authorityEntity);
 
-        log.info("Authority of {} was successfully saved to user {}"
+        log.info("Authority of {} was successfully added to user {}"
                 , authority, username);
     }
 
@@ -131,10 +131,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         UserEntity userEntity = mapper.map(user, UserEntity.class);
 
+        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+
         userEntity.getAuthority().forEach(authority ->
                 authority.getAuthorityId().setUsername(userEntity));
 
         userDao.saveAndFlush(userEntity);
+
+        if (username.equals(user.getUsername())) {
+            log.info("User {} was successfully updated", username);
+
+            return;
+        }
 
         log.info("User {} was successfully updated to user {}"
                 , username, user.getUsername());
