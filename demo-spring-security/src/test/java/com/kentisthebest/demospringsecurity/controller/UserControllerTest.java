@@ -1,8 +1,8 @@
 package com.kentisthebest.demospringsecurity.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kentisthebest.demospringsecurity.dto.UserDto;
 import com.kentisthebest.demospringsecurity.service.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -30,10 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest {
 
     @MockBean
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @MockBean
     private UserDetailsService userDetailsService;
@@ -105,7 +105,7 @@ class UserControllerTest {
     }
 
     @Test
-    void getUser_whenCaughtUsernameNotFoundException_thenThrowResponseStatusException() throws Exception {
+    void getUser_whenCaughtUsernameNotFoundException_thenThrowHandleUsernameNotFoundException() throws Exception {
         // given
         String username = "admin";
 
@@ -125,7 +125,7 @@ class UserControllerTest {
                         .content(jsonString)
                         .contentType(MediaType.APPLICATION_JSON))
                 // then
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -144,7 +144,7 @@ class UserControllerTest {
     }
 
     @Test
-    void addAuthorityToUser_whenCaughtUsernameNotFoundException_thenThrowResponseStatusException() throws Exception {
+    void addAuthorityToUser_whenCaughtUsernameNotFoundException_thenThrowHandleUsernameNotFoundException() throws Exception {
         // given
         String username = "admin";
         String authority = "ROLE_ADMIN";
@@ -158,7 +158,7 @@ class UserControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/user/authority/" + username + "/" + authority)
                         .contentType(MediaType.APPLICATION_JSON))
                 // then
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -238,7 +238,7 @@ class UserControllerTest {
     }
 
     @Test
-    void updateUser_whenCaughtUsernameNotFoundException_thenThrowResponseStatusException() throws Exception {
+    void updateUser_whenCaughtUsernameNotFoundException_thenThrowHandleUsernameNotFoundException() throws Exception {
         // given
         String username = "admin";
 
@@ -258,7 +258,7 @@ class UserControllerTest {
                         .content(jsonString)
                         .contentType(MediaType.APPLICATION_JSON))
                 // then
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -299,7 +299,7 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUser_whenCaughtUsernameNotFoundException_thenThrowResponseStatusException() throws Exception {
+    void deleteUser_whenCaughtUsernameNotFoundException_thenThrowHandleUsernameNotFoundException() throws Exception {
         // given
         String username = "admin";
 
@@ -312,7 +312,7 @@ class UserControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/user/" + username)
                         .contentType(MediaType.APPLICATION_JSON))
                 // then
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
     @Test

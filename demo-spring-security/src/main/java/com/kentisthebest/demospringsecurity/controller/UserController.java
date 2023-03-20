@@ -52,7 +52,7 @@ public class UserController implements UserApi {
             userService.addAuthorityToUser(username, authority);
 
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new MessageResponse("Authority was successfully add to user"));
+                    .body(new MessageResponse("Authority was successfully added to user"));
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
