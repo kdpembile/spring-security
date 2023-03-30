@@ -9,7 +9,7 @@ server:
 #spring configuration
 spring:
   datasource:
-    url: jdbc:h2:file:/data/demo
+    url: jdbc:h2:~/test
     driverClassName: org.h2.Driver
     username: sa
     password:
