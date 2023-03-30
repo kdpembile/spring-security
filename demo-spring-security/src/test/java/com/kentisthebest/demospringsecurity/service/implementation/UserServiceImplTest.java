@@ -1,12 +1,12 @@
 package com.kentisthebest.demospringsecurity.service.implementation;
 
+import com.github.dozermapper.core.Mapper;
 import com.kentisthebest.demospringsecurity.dao.AuthorityDao;
 import com.kentisthebest.demospringsecurity.dao.UserDao;
 import com.kentisthebest.demospringsecurity.dto.UserDto;
 import com.kentisthebest.demospringsecurity.entity.AuthorityEntity;
 import com.kentisthebest.demospringsecurity.entity.AuthorityId;
 import com.kentisthebest.demospringsecurity.entity.UserEntity;
-import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
