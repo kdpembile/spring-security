@@ -1,0 +1,30 @@
+#server configuration
+server:
+  port: 8080
+  servlet.context-path: /api
+  error:
+    include-stacktrace: never
+    include-message: always
+
+#spring configuration
+spring:
+  datasource:
+    url: jdbc:h2:~/test
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    defer-datasource-initialization: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate.ddl-auto: update
+  security.key: secret
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings.trace: false
+      settings.web-allow-others: false
+  sql.init.mode: never
+
+
+
