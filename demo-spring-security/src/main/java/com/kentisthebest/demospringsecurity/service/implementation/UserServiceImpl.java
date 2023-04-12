@@ -74,10 +74,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserDto getUser(String username) {
         return userDao.findByUsername(username)
-                .stream()
-                .findFirst()
                 .map(user -> mapper.map(user, UserDto.class))
-                .orElse(null);
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
     }
 
     @Override
@@ -106,7 +104,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public void updateUser(String username, UserDto userDto) {
         log.info("Updating user {}", username);
 
-        deleteUser(username);
+        userDao.findByUsername(username)
+                .ifPresentOrElse(user -> userDao.deleteById(user.getUsername()),
+                        () -> {
+                            throw new UsernameNotFoundException(USER_NOT_FOUND);
+                        });
 
         UserEntity user = mapper.map(userDto, UserEntity.class);
 
@@ -136,6 +138,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                         () -> {
                             throw new UsernameNotFoundException(USER_NOT_FOUND);
                         });
+
+        userDao.flush();
 
         log.info("User {} was successfully deleted", username);
     }
