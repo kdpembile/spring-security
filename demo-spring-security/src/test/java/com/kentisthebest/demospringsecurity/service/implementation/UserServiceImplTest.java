@@ -3,6 +3,8 @@ package com.kentisthebest.demospringsecurity.service.implementation;
 import com.github.dozermapper.core.Mapper;
 import com.kentisthebest.demospringsecurity.dao.AuthorityDao;
 import com.kentisthebest.demospringsecurity.dao.UserDao;
+import com.kentisthebest.demospringsecurity.dto.AuthorityDto;
+import com.kentisthebest.demospringsecurity.dto.AuthorityIdDto;
 import com.kentisthebest.demospringsecurity.dto.UserDto;
 import com.kentisthebest.demospringsecurity.entity.AuthorityEntity;
 import com.kentisthebest.demospringsecurity.entity.AuthorityId;
@@ -15,20 +17,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 class UserServiceImplTest {
@@ -56,22 +54,13 @@ class UserServiceImplTest {
     @Test
     void loadUserByUsername() {
         // given
-        String username = "KD";
-        String authority = "ROLE_ADMIN";
+        UserEntity user = getUserEntity();
+        String username = user.getUsername();
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUsername(username);
-        userEntity.setPassword("secret");
-        userEntity.setEnabled(true);
-
-        Set<AuthorityEntity> authorityEntities = new HashSet<>();
-        authorityEntities.add(new AuthorityEntity(
-                new AuthorityId(userEntity, authority)));
-
-        userEntity.setAuthority(authorityEntities);
+        Optional<UserEntity> opUser = Optional.of(user);
 
         given(userDao.findByUsername(username))
-                .willReturn(userEntity);
+                .willReturn(opUser);
 
         // when
         userService.loadUserByUsername(username);
@@ -81,87 +70,45 @@ class UserServiceImplTest {
     }
 
     @Test
-    void loadUserByUsername_whenUserEntityIsNull_thenThrowUsernameNotFoundException() {
-        // given
-        String username = "KD";
-
-        given(userDao.findByUsername(username))
-                .willReturn(null);
-
-        // when
-        assertThrows(UsernameNotFoundException.class,
-                () -> userService.loadUserByUsername(username));
-
-        // then
-        verify(userDao).findByUsername(username);
-    }
-
-    @Test
     void saveUser() {
         // given
-        String username = "KD";
-        String authority = "ROLE_ADMIN";
+        UserEntity user = getUserEntity();
 
-        UserDto userDto = mock(UserDto.class);
-
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUsername(username);
-        userEntity.setPassword("secret");
-        userEntity.setEnabled(true);
-
-        Set<AuthorityEntity> authorityEntities = new HashSet<>();
-        authorityEntities.add(new AuthorityEntity(
-                new AuthorityId(userEntity, authority)));
-
-        userEntity.setAuthority(authorityEntities);
+        UserDto userDto = getUserDto();
 
         given(mapper.map(userDto, UserEntity.class))
-                .willReturn(userEntity);
+                .willReturn(user);
 
-        given(userDao.saveAndFlush(userEntity))
-                .willReturn(userEntity);
+        given(userDao.saveAndFlush(user))
+                .willReturn(user);
 
         // when
         userService.saveUser(userDto);
 
         // then
-        then(userDao).should().saveAndFlush(userEntity);
+        then(userDao).should().saveAndFlush(user);
     }
 
     @Test
     void getUser() {
         // given
-        String username = "KD";
+        UserEntity user = getUserEntity();
+        String username = user.getUsername();
 
-        UserEntity userEntity = mock(UserEntity.class);
+        Optional<UserEntity> opUser = Optional.of(user);
 
-        given(userDao.existsById(username))
-                .willReturn(true);
+        UserDto userDto = new UserDto();
 
         given(userDao.findByUsername(username))
-                .willReturn(userEntity);
+                .willReturn(opUser);
 
+        given(mapper.map(user, UserDto.class))
+                .willReturn(userDto);
         // when
         userService.getUser(username);
 
         // then
-        then(userDao).should().existsById(username);
         then(userDao).should().findByUsername(username);
-    }
-
-    @Test
-    void getUser_whenUsernameNotExist_thenThrowUsernameNotFoundException() {
-        // given
-        String username = "KD";
-
-        given(userDao.existsById(username)).willReturn(false);
-
-        // when
-        assertThrows(UsernameNotFoundException.class,
-                () -> userService.getUser(username));
-
-        // then
-        verify(userDao).existsById(username);
     }
 
     @Test
@@ -169,14 +116,15 @@ class UserServiceImplTest {
         // given
         int page = 0;
         int size = 10000;
+        UserEntity user = getUserEntity();
 
-        List<UserEntity> userEntities = new ArrayList<>();
+        List<UserEntity> users = Collections.singletonList(user);
 
-        Page<UserEntity> userEntityPage = new PageImpl<>(userEntities);
+        Page<UserEntity> userPage = new PageImpl<>(users);
 
         Pageable pageable = PageRequest.of(page, size);
 
-        given(userDao.findAll(pageable)).willReturn(userEntityPage);
+        given(userDao.findAll(pageable)).willReturn(userPage);
 
         // when
         userService.getUsers(page, size);
@@ -188,108 +136,73 @@ class UserServiceImplTest {
     @Test
     void addAuthorityToUser() {
         // given
-        String username = "KD";
-        String authority = "ROLE_ADMIN";
+        UserEntity user = getUserEntity();
+        String username = user.getUsername();
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUsername(username);
-        userEntity.setPassword("secret");
-        userEntity.setEnabled(true);
+        AuthorityEntity authority = user
+                .getAuthority()
+                .stream()
+                .findFirst()
+                .orElse(any());
 
-        AuthorityEntity authorityEntity = new AuthorityEntity();
-        authorityEntity.setAuthorityId(new AuthorityId(userEntity, authority));
+        String role = authority.getAuthorityId().getAuthority();
 
-        given(userDao.existsById(username)).willReturn(true);
+        Optional<UserEntity> opUser = Optional.of(user);
 
-        given(userDao.findByUsername(username)).willReturn(userEntity);
+        given(userDao.findByUsername(username)).willReturn(opUser);
 
-        given(authorityDao.saveAndFlush(authorityEntity))
-                .willReturn(authorityEntity);
+        given(authorityDao.saveAndFlush(authority))
+                .willReturn(authority);
 
         // when
-        userService.addAuthorityToUser(username, authority);
+        userService.addAuthorityToUser(username, role);
 
         // then
         then(userDao).should().findByUsername(username);
-        then(authorityDao).should().saveAndFlush(authorityEntity);
-    }
-
-    @Test
-    void addAuthorityToUser_whenUsernameNotExist_thenThrowUsernameNotFoundException() {
-        // given
-        String username = "KD";
-        String authority = "ROLE_ADMIN";
-
-        given(userDao.existsById(username)).willReturn(false);
-
-        // when
-        assertThrows(UsernameNotFoundException.class,
-                () -> userService.addAuthorityToUser(username, authority));
-
-        // then
-        verify(userDao).existsById(username);
+        then(authorityDao).should().saveAndFlush(authority);
     }
 
     @Test
     void updateUser() {
         // given
-        String username = "KD";
-        String authority = "ROLE_ADMIN";
+        UserEntity user = getUserEntity();
+        String username = user.getUsername();
 
-        UserDto userDto = new UserDto();
+        Optional<UserEntity> opUser = Optional.of(user);
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUsername(username);
-        userEntity.setPassword("secret");
-        userEntity.setEnabled(true);
+        UserDto userDto = getUserDto();
 
-        Set<AuthorityEntity> authorityEntities = new HashSet<>();
-        authorityEntities.add(new AuthorityEntity(
-                new AuthorityId(userEntity, authority)));
-
-        userEntity.setAuthority(authorityEntities);
-
-        given(userDao.existsById(username)).willReturn(true);
+        given(userDao.findByUsername(username))
+                .willReturn(opUser);
 
         willDoNothing().given(userDao).deleteById(username);
 
-        given(mapper.map(userDto, UserEntity.class)).willReturn(userEntity);
+        given(mapper.map(userDto, UserEntity.class))
+                .willReturn(user);
 
-        given(userDao.saveAndFlush(userEntity)).willReturn(userEntity);
+        given(userDao.saveAndFlush(user))
+                .willReturn(user);
 
         // when
         userService.updateUser(username, userDto);
 
         // then
-        then(userDao).should().existsById(username);
+        then(userDao).should().findByUsername(username);
         then(userDao).should().deleteById(username);
         then(mapper).should().map(userDto, UserEntity.class);
-        then(userDao).should().saveAndFlush(userEntity);
-    }
-
-    @Test
-    void updateUser_whenUsernameNotExist_thenThrowUsernameNotFoundException() {
-        // given
-        String username = "KD";
-
-        UserDto userDto = mock(UserDto.class);
-
-        given(userDao.existsById(username)).willReturn(false);
-
-        // when
-        assertThrows(UsernameNotFoundException.class,
-                () -> userService.updateUser(username, userDto));
-
-        // then
-        verify(userDao).existsById(username);
+        then(userDao).should().saveAndFlush(user);
     }
 
     @Test
     void deleteUser() {
         // given
-        String username = "KD";
+        UserEntity user = getUserEntity();
+        String username = user.getUsername();
 
-        given(userDao.existsById(username)).willReturn(true);
+        Optional<UserEntity> opUser = Optional.of(user);
+
+        given(userDao.findByUsername(username))
+                .willReturn(opUser);
 
         willDoNothing().given(userDao).deleteById(username);
 
@@ -297,22 +210,41 @@ class UserServiceImplTest {
         userService.deleteUser(username);
 
         // then
-        then(userDao).should().existsById(username);
+        then(userDao).should().findByUsername(username);
         then(userDao).should().deleteById(username);
     }
 
-    @Test
-    void deleteUser_whenUsernameNotExist_thenThrowUsernameNotFoundException() {
-        // given
+    public UserEntity getUserEntity() {
         String username = "KD";
+        String role = "ROLE_ADMIN";
 
-        given(userDao.existsById(username)).willReturn(false);
+        UserEntity user = new UserEntity();
+        user.setUsername(username);
+        user.setPassword("secret");
+        user.setEnabled(true);
 
-        // when
-        assertThrows(UsernameNotFoundException.class,
-                () -> userService.deleteUser(username));
+        AuthorityEntity authority = new AuthorityEntity();
+        authority.setAuthorityId(new AuthorityId(user, role));
 
-        // then
-        verify(userDao).existsById(username);
+        user.setAuthority(Collections.singleton(authority));
+
+        return user;
+    }
+
+    public UserDto getUserDto() {
+        String username = "KD";
+        String role = "ROLE_ADMIN";
+
+        UserDto userDto = new UserDto();
+        userDto.setUsername(username);
+        userDto.setPassword("secret");
+        userDto.setEnabled(true);
+
+        AuthorityDto authorityDto = new AuthorityDto();
+        authorityDto.setAuthorityId(new AuthorityIdDto(role));
+
+        userDto.setAuthority(Collections.singleton(authorityDto));
+
+        return userDto;
     }
 }
