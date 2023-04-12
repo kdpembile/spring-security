@@ -37,7 +37,7 @@ http://localhost:8080/api/swagger-ui/index.html
 
 ## H2 database endpoint
 
-http://localhost:8080/api/h2-console/
+http://localhost:8080/api/h2-console
 
 ## Authors
 
