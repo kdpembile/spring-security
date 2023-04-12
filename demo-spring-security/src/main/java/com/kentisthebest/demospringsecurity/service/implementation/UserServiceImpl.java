@@ -11,9 +11,7 @@ import com.kentisthebest.demospringsecurity.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import static com.kentisthebest.demospringsecurity.error.ErrorHandler.USER_NOT_FOUND;
 
@@ -48,95 +45,79 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity userEntity = userDao.findByUsername(username);
-        if (userEntity == null) {
-            throw new UsernameNotFoundException(USER_NOT_FOUND);
-        }
+        UserEntity user = userDao.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
 
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        userEntity.getAuthority().forEach(authority ->
+        user.getAuthority().forEach(authority ->
                 authorities.add(new SimpleGrantedAuthority(authority.getAuthorityId().getAuthority()))
         );
-        return new User(userEntity.getUsername(), userEntity.getPassword(), userEntity.isEnabled(), true, true, true, authorities);
+        return new User(user.getUsername(), user.getPassword(), user.isEnabled(), true, true, true, authorities);
     }
 
     @Override
-    public void saveUser(UserDto user) {
-        log.info("Saving user {} ...", user.getUsername());
+    public void saveUser(UserDto userDto) {
+        log.info("Saving user {} ...", userDto.getUsername());
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
-        UserEntity userEntity = mapper.map(user, UserEntity.class);
+        UserEntity user = mapper.map(userDto, UserEntity.class);
 
-        userEntity.getAuthority().forEach(authority ->
-                authority.getAuthorityId().setUsername(userEntity));
+        user.getAuthority().forEach(authority ->
+                authority.getAuthorityId().setUsername(user));
 
-        userDao.saveAndFlush(userEntity);
+        userDao.saveAndFlush(user);
 
-        log.info("{} was successfully saved and flushed", userEntity.getUsername());
+        log.info("{} was successfully saved and flushed", user.getUsername());
     }
 
     @Override
     public UserDto getUser(String username) {
-        if (!userDao.existsById(username)) {
-            throw new UsernameNotFoundException(USER_NOT_FOUND);
-        }
-
-        UserEntity userEntity = userDao.findByUsername(username);
-
-        return mapper.map(userEntity, UserDto.class);
+        return userDao.findByUsername(username)
+                .map(user -> mapper.map(user, UserDto.class))
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
     }
 
     @Override
     public Page<UserDto> getUsers(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-
-        Page<UserEntity> userEntities = userDao.findAll(pageable);
-
-        List<UserDto> userDtos = userEntities.getContent().stream()
-                .map(userEntity -> mapper.map(userEntity, UserDto.class))
-                .toList();
-
-        return new PageImpl<>(userDtos, pageable, userDtos.size());
+        return userDao.findAll(PageRequest.of(page, size))
+                .map(user -> mapper.map(user, UserDto.class));
     }
 
     @Override
-    public void addAuthorityToUser(String username, String authority) throws UsernameNotFoundException {
-        log.info("Adding authority of {} to user {}", authority, username);
+    public void addAuthorityToUser(String username, String role) {
+        log.info("Adding authority of {} to user {}", role, username);
 
-        if (!userDao.existsById(username)) {
-            throw new UsernameNotFoundException(USER_NOT_FOUND);
-        }
-
-        UserEntity userEntity = userDao.findByUsername(username);
+        UserEntity user = userDao.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
 
         AuthorityEntity authorityEntity = new AuthorityEntity();
-        authorityEntity.setAuthorityId(new AuthorityId(userEntity, authority));
+        authorityEntity.setAuthorityId(new AuthorityId(user, role));
 
         authorityDao.saveAndFlush(authorityEntity);
 
         log.info("Authority of {} was successfully added to user {}"
-                , authority, username);
+                , role, username);
     }
 
     @Override
-    public void updateUser(String username, UserDto user) {
+    public void updateUser(String username, UserDto userDto) {
         log.info("Updating user {}", username);
 
-        if (!userDao.existsById(username)) {
-            throw new UsernameNotFoundException(USER_NOT_FOUND);
-        }
+        userDao.findByUsername(username)
+                .ifPresentOrElse(user -> userDao.deleteById(user.getUsername()),
+                        () -> {
+                            throw new UsernameNotFoundException(USER_NOT_FOUND);
+                        });
 
-        userDao.deleteById(username);
+        UserEntity user = mapper.map(userDto, UserEntity.class);
 
-        UserEntity userEntity = mapper.map(user, UserEntity.class);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+        user.getAuthority().forEach(authority ->
+                authority.getAuthorityId().setUsername(user));
 
-        userEntity.getAuthority().forEach(authority ->
-                authority.getAuthorityId().setUsername(userEntity));
-
-        userDao.saveAndFlush(userEntity);
+        userDao.saveAndFlush(user);
 
         if (username.equals(user.getUsername())) {
             log.info("User {} was successfully updated", username);
@@ -152,11 +133,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public void deleteUser(String username) {
         log.info("Deleting user {}", username);
 
-        if (!userDao.existsById(username)) {
-            throw new UsernameNotFoundException(USER_NOT_FOUND);
-        }
+        userDao.findByUsername(username)
+                .ifPresentOrElse(user -> userDao.deleteById(user.getUsername()),
+                        () -> {
+                            throw new UsernameNotFoundException(USER_NOT_FOUND);
+                        });
 
-        userDao.deleteById(username);
+        userDao.flush();
 
         log.info("User {} was successfully deleted", username);
     }

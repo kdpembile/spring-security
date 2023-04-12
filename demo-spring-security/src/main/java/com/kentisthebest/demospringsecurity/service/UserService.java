@@ -2,16 +2,15 @@ package com.kentisthebest.demospringsecurity.service;
 
 import com.kentisthebest.demospringsecurity.dto.UserDto;
 import org.springframework.data.domain.Page;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public interface UserService {
 
     /**
      * Save new user
      *
-     * @param user user details
+     * @param userDto user details
      */
-    void saveUser(UserDto user);
+    void saveUser(UserDto userDto);
 
     /**
      * Return user dto
@@ -33,18 +32,18 @@ public interface UserService {
     /**
      * Add authority to user
      *
-     * @param username user username
-     * @param authority user authority
+     * @param username  user username
+     * @param role user role
      */
-    void addAuthorityToUser(String username, String authority) throws UsernameNotFoundException;
+    void addAuthorityToUser(String username, String role);
 
     /**
      * Update user
      *
      * @param username user username
-     * @param user user details
+     * @param userDto  user details
      */
-    void updateUser(String username, UserDto user);
+    void updateUser(String username, UserDto userDto);
 
     /**
      * Delete user
