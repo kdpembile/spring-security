@@ -17,7 +17,7 @@ Clone the project
 
 Using Command-line Arguments to run Spring boot project
 ```bash
-mvn spring-boot:run
+  mvn spring-boot:run
 ```
 
 ## Running Tests
